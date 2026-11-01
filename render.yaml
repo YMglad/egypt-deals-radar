@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: egypt-black-friday-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    plan: free
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
+      - key: SCAN_INTERVAL_SECONDS
+        value: 600
+      - key: WEBAPP_URL
+        fromService:
+          type: web
+          name: egypt-black-friday-bot
+          property: host
