@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>رادار صفقات البلاك فرايدي مصر 2026</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glow-red {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+        }
+        .glow-gold {
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20 select-none">
+
+    <!-- Top App Bar -->
+    <header class="sticky top-0 z-50 bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-lg">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <h1 class="text-lg font-black tracking-wide text-white">رادار الصفقات الحقيقية</h1>
+            </div>
+            <span class="bg-red-950 text-red-400 text-xs px-2.5 py-1 rounded-full border border-red-800/60 font-bold flex items-center gap-1">
+                🔥 عروض +40% وفلاش سيل
+            </span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mt-3 relative">
+            <input type="text" id="searchInput" placeholder="ابحث عن منتج، ماركة، أو لابتوب..." 
+                   class="w-full bg-slate-900/90 text-sm border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+            <svg class="w-5 h-5 text-slate-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+
+        <!-- Filter Chips (Stores) -->
+        <div class="flex gap-2 overflow-x-auto mt-3 pb-1 no-scrollbar text-xs font-medium">
+            <button class="store-filter active bg-indigo-600 text-white px-3 py-1.5 rounded-lg whitespace-nowrap shadow-sm" data-store="All">الكل (جميع المتاجر)</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="2B Egypt">2B Egypt</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="Noon Egypt">Noon Egypt</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="Amazon Egypt">Amazon Egypt</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="Breadfast (بريدفاست)">بريدفاست Breadfast</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="Talabat (طلبات)">طلبات Talabat</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="B.TECH">B.TECH</button>
+            <button class="store-filter bg-slate-800 text-slate-300 hover:bg-slate-700 px-3 py-1.5 rounded-lg whitespace-nowrap" data-store="Dream 2000">Dream 2000</button>
+        </div>
+    </header>
+
+    <main class="p-4 space-y-4 max-w-xl mx-auto">
+
+        <!-- VIP Special Order Box: ASUS ROG Strix 18 -->
+        <section class="bg-gradient-to-br from-slate-900 via-indigo-950/60 to-purple-950/40 border-2 border-indigo-500/50 rounded-2xl p-4 glow-red relative overflow-hidden">
+            <div class="absolute top-0 left-0 bg-gradient-to-r from-red-600 to-indigo-600 text-[11px] font-black px-3 py-1 rounded-br-xl uppercase tracking-wider text-white">
+                ⭐ طلبك الخاص (Special Order)
+            </div>
+            
+            <div class="mt-4 flex items-start gap-3">
+                <div class="bg-indigo-900/40 border border-indigo-700/50 p-2.5 rounded-xl text-indigo-400">
+                    💻
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-white leading-snug">ASUS ROG Strix SCAR 18 (2026)</h2>
+                    <p class="text-xs text-indigo-300 mt-0.5">Intel Core Ultra 9 | RTX 5080 (16GB) | 64GB RAM | 2.5K 240Hz</p>
+                </div>
+            </div>
+
+            <!-- Price Analysis & Savings -->
+            <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-slate-950/70 border border-emerald-500/30 rounded-xl p-2.5">
+                    <span class="text-emerald-400 font-bold block text-[11px]">أرخص سعر حقيقي (2B Egypt)</span>
+                    <span class="text-base font-black text-white">232,799 ج.م</span>
+                    <span class="text-[10px] text-emerald-400 block mt-0.5">وفر 33,381 ج.م عن باقي المتاجر</span>
+                </div>
+                <div class="bg-slate-950/70 border border-slate-700/40 rounded-xl p-2.5">
+                    <span class="text-slate-400 block text-[11px]">سعر Dream 2000 لنفس الموديل</span>
+                    <span class="text-sm font-bold text-slate-300 line-through">266,180 ج.م</span>
+                    <span class="text-[10px] text-amber-400 block mt-0.5">فرق سعر غير مبرر</span>
+                </div>
+            </div>
+
+            <!-- Installment & Action -->
+            <div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
+                <span class="text-indigo-200 text-[11px] flex items-center gap-1">
+                    💳 تقسيط 0% فوائد مع <b>valU</b> و <b>CIB</b>
+                </span>
+                <a href="https://2b.com.eg/en/catalogsearch/result/?q=rog+strix+18" target="_blank"
+                   class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">
+                    عرض الصفقة في 2B ↗
+                </a>
+            </div>
+        </section>
+
+        <!-- Deals Feed Section Header -->
+        <div class="flex items-center justify-between pt-2">
+            <h3 class="text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                ⚡ أقوى الصفقات الحالية المرصودة
+                <span id="dealCount" class="bg-slate-800 text-indigo-400 text-[11px] px-2 py-0.5 rounded-full font-bold">5</span>
+            </h3>
+            <span class="text-[11px] text-slate-500">تحديث لحظي</span>
+        </div>
+
+        <!-- Deals Container -->
+        <div id="dealsContainer" class="space-y-3">
+            <!-- Rendered dynamically by app.js -->
+        </div>
+
+    </main>
+
+    <!-- Bottom Action Bar for Telegram -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-800 px-4 py-2.5 flex items-center justify-around z-40 text-xs">
+        <button id="refreshBtn" class="flex flex-col items-center gap-1 text-indigo-400 font-medium">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>تحديث الصفقات</span>
+        </button>
+        <button id="alertSettingsBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white font-medium">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <span>إعدادات التنبيه</span>
+        </button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
