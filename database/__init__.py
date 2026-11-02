@@ -55,6 +55,16 @@ def get_laptop_deals(db_path: str = "deals.db") -> List[Dict[str, Any]]:
     return [d.to_dict() for d in deals]
 
 
+def add_subscriber(chat_id: str, topic: Optional[str] = "ALL", db_path: str = "deals.db") -> bool:
+    """Adds a subscriber chat ID to the database."""
+    return get_service(db_path).add_subscriber(chat_id, topic)
+
+
+def get_subscribers(topic: Optional[str] = None, db_path: str = "deals.db") -> List[str]:
+    """Retrieves all registered subscriber chat IDs."""
+    return get_service(db_path).get_subscribers(topic)
+
+
 __all__ = [
     "DatabaseService",
     "get_service",
@@ -62,4 +72,6 @@ __all__ = [
     "save_or_update_deal",
     "get_all_deals",
     "get_laptop_deals",
+    "add_subscriber",
+    "get_subscribers",
 ]
