@@ -54,3 +54,13 @@ def get_laptop_deals(db_path: str = DB_FILE) -> List[Dict[str, Any]]:
     """Fetches active laptop deals, returned as dictionaries."""
     deals = get_service(db_path).get_active_laptops()
     return [d.to_dict() for d in deals]
+
+
+def add_subscriber(chat_id: str, topic: Optional[str] = "ALL", db_path: str = DB_FILE) -> bool:
+    """Adds a subscriber chat ID to the database."""
+    return get_service(db_path).add_subscriber(chat_id, topic)
+
+
+def get_subscribers(topic: Optional[str] = None, db_path: str = DB_FILE) -> List[str]:
+    """Retrieves all registered subscriber chat IDs."""
+    return get_service(db_path).get_subscribers(topic)

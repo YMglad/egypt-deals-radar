@@ -332,8 +332,8 @@ class TestCategoryClassifierLaptops(unittest.TestCase):
         self.assertNotEqual(cat_charger, CategoryEnum.LAPTOPS)
 
     def test_tag_deal_category_sets_is_special_laptop(self):
-        """Verifies tag_deal_category sets is_special_laptop=True for laptop deals."""
-        deal = Deal(
+        """Verifies tag_deal_category correctly distinguishes ordinary laptops from the special ASUS ROG Strix 18."""
+        deal_ordinary = Deal(
             id="d1",
             title="HP Victus 15 Gaming Laptop Intel i5 RTX 3050",
             store=StoreEnum.TWO_B,
@@ -343,9 +343,23 @@ class TestCategoryClassifierLaptops(unittest.TestCase):
             discount_percentage=14.0,
             url="https://2b.com.eg/p1",
         )
-        tagged = tag_deal_category(deal)
-        self.assertEqual(tagged.category, CategoryEnum.LAPTOPS)
-        self.assertTrue(tagged.is_special_laptop)
+        tagged_ord = tag_deal_category(deal_ordinary)
+        self.assertEqual(tagged_ord.category, CategoryEnum.LAPTOPS)
+        self.assertFalse(tagged_ord.is_special_laptop)
+
+        deal_rog = Deal(
+            id="d2",
+            title="ASUS ROG Strix SCAR 18 G835LX Intel Ultra 9 RTX 5080",
+            store=StoreEnum.TWO_B,
+            category=CategoryEnum.HOUSEHOLD_GENERAL,
+            original_price=240000.0,
+            discount_price=199999.0,
+            discount_percentage=16.7,
+            url="https://2b.com.eg/rog18",
+        )
+        tagged_rog = tag_deal_category(deal_rog)
+        self.assertEqual(tagged_rog.category, CategoryEnum.LAPTOPS)
+        self.assertTrue(tagged_rog.is_special_laptop)
 
 
 class TestCategoryClassifierBabyDiapers(unittest.TestCase):

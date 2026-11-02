@@ -15,13 +15,21 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppI
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # Internal modules
-from database import init_db, save_or_update_deal, get_all_deals, get_laptop_deals
+from database import (
+    init_db,
+    save_or_update_deal,
+    get_all_deals,
+    get_laptop_deals,
+    add_subscriber,
+    get_subscribers,
+)
 from scraper import scrape_all_deals
+from core.models import CategoryEnum
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "9060276835:AAELf_C59rVRPqWQhFPIotBEpVEVJM3FLuI")
-CHAT_ID = os.getenv("CHAT_ID", "628511175")
+PRIMARY_CHAT_ID = os.getenv("CHAT_ID", "628511175")
 WEBAPP_URL = os.getenv("WEBAPP_URL", "https://ymglad.github.io/egypt-deals-radar/")
 
 # 90 seconds interval (1.5 minutes) for rapid real-time deal alerts
@@ -31,12 +39,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 logger = logging.getLogger("BlackFridayBot")
 
 init_db()
+# Ensure primary chat is enrolled immediately
+add_subscriber(PRIMARY_CHAT_ID)
 
 app = FastAPI(title="Egypt Black Friday Deals Radar")
 
 webapp_dir = os.path.join(os.path.dirname(__file__), "webapp")
 if os.path.exists(webapp_dir):
     app.mount("/static", StaticFiles(directory=webapp_dir), name="static")
+
 
 @app.get("/")
 async def serve_webapp():
@@ -45,37 +56,41 @@ async def serve_webapp():
         return FileResponse(index_file)
     return {"message": "Deals Tracker API Running"}
 
+
 @app.get("/api/deals")
 async def api_get_deals(store: Optional[str] = None, category: Optional[str] = None):
     deals = get_all_deals(category=category, store=store, min_discount=0)
     return JSONResponse(deals)
+
 
 @app.get("/api/laptop")
 async def api_get_laptop():
     laptops = get_laptop_deals()
     return JSONResponse(laptops)
 
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "scan_interval": SCAN_INTERVAL_SECONDS}
 
+
 # --- Telegram Handlers ---
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
+    chat_id = str(update.effective_chat.id)
     logger.info(f"User started bot: {chat_id}")
     
-    global CHAT_ID
-    CHAT_ID = str(chat_id)
+    # Store subscriber persistently without overwriting other users
+    add_subscriber(chat_id)
         
     welcome_text = (
         "👋 **أهلاً بك في رادار عروض البلاك فرايدي مصر 2026!**\n\n"
-        "⚡ **النظام يعمل الآن بتحديث فوري كل 1–2 دقيقة على هذا الشات مباشرة!**\n\n"
+        "⚡ **النظام يعمل الآن بتحديث فوري كل 1–2 دقيقة على هاتفك مباشرة!**\n\n"
         "🛒 **الأقسام المشمولة:**\n"
-        "• 👶 **حفاضات الأطفال ومستلزمات البيبي** (Pampers, Molfix, Fine Baby)\n"
+        "• 👶 **حفاضات الأطفال ومستلزمات البيبي** (Pampers, Molfix, Fine Baby, Bebem)\n"
         "• 👕 **ملابس الأطفال وأزياء الرضع**\n"
-        "• 👗 **ملابس الكبار والصغار** (قطونيل وماركات كبرى)\n"
-        "• 🏠 **مستلزمات البيت والبقالة والأجهزة** (بريدفاست وطلبات مارت وأمازون ونون)\n"
+        "• 👗 **ملابس الكبار والصغار** (قطونيل، ديفاكتو، وماركات كبرى)\n"
+        "• 🏠 **مستلزمات البيت والبقالة والأجهزة** (بريدفاست، طلبات مارت، أمازون، نون، كارفور، جوميا، فاليو، وبي تك)\n"
         "• 💻 **#Laptop - قسم خاص ومستقل للابتوب ASUS ROG Strix 18**\n\n"
         "📱 **ستصلك التنبيهات فوراً مع روابط طلب مباشرة لشراء المنتج بنقرة واحدة!**"
     )
@@ -89,6 +104,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(welcome_text, parse_mode="Markdown", reply_markup=reply_markup)
+
 
 async def laptop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     laptops = get_laptop_deals()
@@ -108,8 +124,9 @@ async def laptop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     await update.message.reply_text(msg, parse_mode="Markdown", disable_web_page_preview=False)
 
+
 async def scan_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🔎 جاري فحص كافة المتاجر والتطبيقات الآن (Amazon, Noon, Breadfast, Talabat, Carrefour, Jumia, 2B)...")
+    await update.message.reply_text("🔎 جاري فحص كافة المتاجر والتطبيقات الآن (Amazon, Noon, Breadfast, Talabat, Carrefour, Jumia, ValU, B.Tech, 2B)...")
     deals = await scrape_all_deals()
     for deal in deals:
         save_or_update_deal(deal)
@@ -126,48 +143,78 @@ async def scan_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     await update.message.reply_text(msg, parse_mode="Markdown", disable_web_page_preview=False)
 
+
 async def check_deals_periodic(bot):
     """
     Background worker: scans every 90 seconds and sends new deals / flash sales
-    directly to the user's Telegram chat with a direct order button.
+    directly to all subscribed users on Telegram with a direct order button.
     """
     logger.info(f"Starting periodic deals checker every {SCAN_INTERVAL_SECONDS} seconds...")
+    add_subscriber(PRIMARY_CHAT_ID)
+    
     while True:
         try:
-            logger.info("Executing periodic scan across all platforms...")
+            logger.info("Executing periodic scan across all Egyptian retail platforms...")
             new_deals = await scrape_all_deals()
             
+            # Fetch all subscribers and ensure primary user is always included
+            subscribers = set(get_subscribers())
+            subscribers.add(PRIMARY_CHAT_ID)
+            if os.getenv("CHAT_ID"):
+                subscribers.add(str(os.getenv("CHAT_ID")))
+                
             for deal in new_deals:
                 is_alert = save_or_update_deal(deal)
-                target_chat = CHAT_ID or "628511175"
-                if is_alert and target_chat:
-                    if deal.get("is_special_laptop"):
-                        alert_header = "💻 **#Laptop - تنبيه لابتوب طلبك الخاص (ASUS ROG Strix 18)!**"
-                    elif "حفاضات" in deal.get("category", "") or "أطفال" in deal.get("category", ""):
-                        alert_header = "👶 **تنبيه عروض الأطفال والأسرة!**"
-                    elif deal.get("is_flash_sale"):
-                        alert_header = "🚨 **فلاش سيل عاجل!**"
-                    else:
-                        alert_header = "📢 **صفقة حقيقية جديدة!**"
-                        
-                    msg = (
-                        f"{alert_header}\n\n"
-                        f"🏷️ **{deal['title']}**\n"
-                        f"🏪 المتجر: **{deal['store']}** | القسم: {deal.get('category', '')}\n"
-                        f"💵 السعر الحالي: **{deal['discount_price']:,.0f} ج.م** "
-                        f"~~({deal['original_price']:,.0f} ج.م)~~\n"
-                        f"🔥 نسبة الخصم الفعلي: **{deal['discount_percentage']}%**\n"
-                    )
-                    if deal.get("coupon_code"):
-                        msg += f"🎟️ كود إضافي: `{deal['coupon_code']}`\n"
-                    if deal.get("installment_info"):
-                        msg += f"💳 التقسيط: {deal['installment_info']}\n"
-                        
-                    # Guaranteed safe URL
-                    prod_url = deal.get("url") if (deal.get("url") and deal["url"].startswith("http")) else "https://www.amazon.eg/"
-                    keyboard = [[InlineKeyboardButton("🛒 اطلب الآن مباشرة ↗", url=prod_url)]]
-                    reply_markup = InlineKeyboardMarkup(keyboard)
+                if not is_alert:
+                    continue
                     
+                cat_str = str(deal.get("category", "")).lower()
+                is_laptop = (
+                    cat_str == "laptops" or 
+                    cat_str == CategoryEnum.LAPTOPS.value.lower() or 
+                    "laptop" in cat_str
+                )
+                
+                # ISOLATION: Standard general laptops do not flood periodic alerts.
+                # Only the special ASUS ROG Strix 18 alerts if price changed.
+                if is_laptop and not deal.get("is_special_laptop"):
+                    continue
+                    
+                # Determine appropriate Arabic banner
+                if deal.get("is_special_laptop"):
+                    alert_header = "💻 **#Laptop - تنبيه سعر لابتوب ASUS ROG Strix 18!**"
+                elif "حفاضات" in deal.get("category", "") or "diaper" in cat_str or "baby" in cat_str or "أطفال" in deal.get("category", ""):
+                    alert_header = "👶 **تنبيه عروض وتوفير مستلزمات وحفاضات الأطفال!**"
+                elif "ملابس" in deal.get("category", "") or "clothing" in cat_str or "أزياء" in deal.get("category", ""):
+                    alert_header = "👕 **تنبيه عروض أزياء وملابس الأسرة والأطفال!**"
+                elif "بقالة" in deal.get("category", "") or "groceries" in cat_str or "household" in cat_str:
+                    alert_header = "🛒 **تنبيه صفقات السوبرماركت ومستلزمات البيت!**"
+                elif deal.get("is_flash_sale"):
+                    alert_header = "🚨 **صفقة فلاش سيل عاجلة - Black Friday!**"
+                else:
+                    alert_header = "📢 **صفقة حقيقية جديدة الآن في مصر!**"
+                    
+                msg = (
+                    f"{alert_header}\n\n"
+                    f"🏷️ **{deal['title']}**\n"
+                    f"🏪 المتجر: **{deal['store']}** | القسم: {deal.get('category', '')}\n"
+                    f"💵 السعر الفعلي: **{deal['discount_price']:,.0f} ج.م** "
+                    f"~~({deal['original_price']:,.0f} ج.م)~~\n"
+                    f"🔥 نسبة الخصم: **{deal['discount_percentage']}%**\n"
+                )
+                if deal.get("coupon_code"):
+                    msg += f"🎟️ كود الخصم: `{deal['coupon_code']}`\n"
+                if deal.get("installment_info"):
+                    msg += f"💳 التقسيط: {deal['installment_info']}\n"
+                    
+                prod_url = deal.get("url")
+                if not prod_url or not prod_url.startswith("http"):
+                    prod_url = "https://www.amazon.eg/"
+                    
+                keyboard = [[InlineKeyboardButton("🛒 اطلب الآن مباشرة ↗", url=prod_url)]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                for target_chat in subscribers:
                     try:
                         await bot.send_message(
                             chat_id=target_chat,
@@ -177,14 +224,15 @@ async def check_deals_periodic(bot):
                             disable_web_page_preview=False
                         )
                         logger.info(f"Telegram notification sent to {target_chat} for: {deal['title']}")
-                        await asyncio.sleep(1) # rate limit prevention
+                        await asyncio.sleep(0.3)
                     except Exception as e:
-                        logger.error(f"Failed to send Telegram message: {e}")
+                        logger.error(f"Failed to send Telegram message to {target_chat}: {e}")
                         
         except Exception as e:
             logger.error(f"Error in scan cycle: {e}")
             
         await asyncio.sleep(SCAN_INTERVAL_SECONDS)
+
 
 async def main():
     bot_app = None
@@ -207,6 +255,7 @@ async def main():
     config = uvicorn.Config(app=app, host="0.0.0.0", port=port, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

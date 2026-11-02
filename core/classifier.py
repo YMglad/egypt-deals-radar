@@ -185,10 +185,22 @@ def classify_deal(
     return CategoryEnum.HOUSEHOLD_GENERAL
 
 
+def is_special_rog_strix_18(title: str) -> bool:
+    """Checks whether the title specifically targets the ASUS ROG Strix 18 (G835LW/G835LX/SCAR 18)."""
+    if not title:
+        return False
+    t = title.lower()
+    return bool(
+        ("rog" in t and "strix" in t and ("18" in t or "scar 18" in t or "g835" in t))
+        or ("scar 18" in t)
+        or ("g835" in t)
+    )
+
+
 def tag_deal_category(deal: Deal) -> Deal:
     """Classifies and applies the resolved category and laptop flag to a Deal instance."""
     resolved_cat = classify_deal(deal.title, deal.store, deal.category.value if deal.category else None)
     deal.category = resolved_cat
-    if resolved_cat == CategoryEnum.LAPTOPS:
-        deal.is_special_laptop = True
+    # Only tag as special laptop if it specifically matches ASUS ROG Strix 18
+    deal.is_special_laptop = is_special_rog_strix_18(deal.title)
     return deal
