@@ -4,3 +4,5 @@ __pycache__/
 deals.db
 cloudflared.exe
 .env
+.agents/
+*.log
